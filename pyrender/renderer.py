@@ -42,6 +42,7 @@ class Renderer(object):
         # Scaling needed on retina displays
         if sys.platform == 'darwin':
             self.dpscale = 2
+        #print(viewport_width, viewport_height)
 
         self.viewport_width = viewport_width
         self.viewport_height = viewport_height
@@ -237,7 +238,7 @@ class Renderer(object):
 
         # Resize for macos if needed
         if sys.platform == 'darwin':
-            color_im = self._resize_image(color_im, True)
+            color_im = self._resize_image(color_im, False)
 
         return color_im
 
@@ -274,7 +275,7 @@ class Renderer(object):
 
         # Resize for macos if needed
         if sys.platform == 'darwin':
-            depth_im = self._resize_image(depth_im)
+            depth_im = self._resize_image(depth_im, False)
 
         return depth_im
 
@@ -324,7 +325,7 @@ class Renderer(object):
         # Clear it
         glClearColor(*scene.bg_color)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-        glEnable(GL_MULTISAMPLE)
+        glDisable(GL_MULTISAMPLE)
 
         # Set up camera matrices
         V, P = self._get_camera_matrices(scene)
@@ -1056,13 +1057,13 @@ class Renderer(object):
             # Generate multisample buffer
             self._main_cb_ms, self._main_db_ms = glGenRenderbuffers(2)
             glBindRenderbuffer(GL_RENDERBUFFER, self._main_cb_ms)
-            glRenderbufferStorageMultisample(
-                GL_RENDERBUFFER, 4, GL_RGBA,
+            glRenderbufferStorage(
+                GL_RENDERBUFFER, GL_RGBA,
                 self.viewport_width, self.viewport_height
             )
             glBindRenderbuffer(GL_RENDERBUFFER, self._main_db_ms)
-            glRenderbufferStorageMultisample(
-                GL_RENDERBUFFER, 4, GL_DEPTH_COMPONENT24,
+            glRenderbufferStorage(
+                GL_RENDERBUFFER, GL_DEPTH_COMPONENT24,
                 self.viewport_width, self.viewport_height
             )
             self._main_fb_ms = glGenFramebuffers(1)
@@ -1132,7 +1133,7 @@ class Renderer(object):
 
         # Resize for macos if needed
         if sys.platform == 'darwin':
-            depth_im = self._resize_image(depth_im)
+            depth_im = self._resize_image(depth_im, False)
 
         if flags & RenderFlags.DEPTH_ONLY:
             return depth_im
@@ -1154,7 +1155,7 @@ class Renderer(object):
 
         # Resize for macos if needed
         if sys.platform == 'darwin':
-            color_im = self._resize_image(color_im, True)
+            color_im = self._resize_image(color_im, False)
 
         return color_im, depth_im
 
